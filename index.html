@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pour toi – Valdes</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #09090f;
+    --text: rgba(218, 212, 240, 0.88);
+    --text-dim: rgba(180, 170, 210, 0.55);
+    --accent: rgba(180, 155, 230, 0.9);
+    --glow: rgba(150, 120, 220, 0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 100px 0;
+    overflow-x: hidden;
+  }
+
+  /* Fond ambiant animé */
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(100, 80, 180, 0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(160, 100, 200, 0.05) 0%, transparent 70%);
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 680px;
+    padding: 70px 40px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, transparent, rgba(160,140,220,0.3));
+    margin-bottom: 8px;
+  }
+
+  .header-label {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .header-title {
+    font-size: 13px;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(200,190,240,0.4);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s forwards;
+  }
+
+  .scroll-hint span {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 28px;
+    background: linear-gradient(to bottom, rgba(160,140,220,0.4), transparent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Content */
+  .content {
+    width: 100%;
+    max-width: 640px;
+    padding: 20px 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Blocs de texte */
+  .block {
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  .block.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .line {
+    font-size: 19px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.9;
+    color: var(--text);
+    display: block;
+  }
+
+  .line b, .line strong {
+    font-weight: 600;
+    font-style: italic;
+    color: rgba(230, 220, 255, 0.98);
+    font-size: 20px;
+  }
+
+  /* Séparateur entre strophes */
+  .strophe-sep {
+    height: 32px;
+    display: block;
+  }
+
+  /* Séparateur visuel entre sections */
+  .section-sep {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 44px 0;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  .section-sep.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sep-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(160,140,220,0.2), transparent);
+  }
+
+  .sep-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(160,140,220,0.4);
+  }
+
+  /* Question mise en valeur */
+  .question-block {
+    background: rgba(120, 100, 180, 0.06);
+    border-left: 2px solid rgba(160,140,220,0.25);
+    padding: 20px 24px;
+    margin: 8px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .question-block .line {
+    color: rgba(210, 200, 245, 0.9);
+  }
+
+  /* Signature */
+  .signature-block {
+    margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .signature-block.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sig-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    color: rgba(200, 188, 240, 0.85);
+    letter-spacing: 0.05em;
+  }
+
+  .sig-role {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .sig-line {
+    width: 50px;
+    height: 1px;
+    background: rgba(160,140,220,0.3);
+    margin-bottom: 8px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .content { padding: 20px 28px; }
+    .line { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="header">
+  <div class="header-line"></div>
+  <div class="header-label">Une lettre</div>
+  <div class="header-title">pour toi, Shekina</div>
+  <div class="scroll-hint">
+    <span>lire</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Bloc 1 -->
+  <div class="block">
+    <span class="line">Où commencer ?</span>
+    <span class="line">Comment écrire pour te toucher ?</span>
+    <span class="line">Que dire de toi ?</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 2 -->
+  <div class="block">
+    <span class="line">Je t'ai rencontré <b>un soir en classe.</b></span>
+    <span class="line">Je t'ai introduit,</span>
+    <span class="line">Tu étais timide.</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 3 -->
+  <div class="block">
+    <span class="line">Tu aurais dû être ma voisine de table.</span>
+    <span class="line">Mais ce que je suis m'a transporté loin de toi.</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 4 -->
+  <div class="block">
+    <span class="line">Mais tu <b>attirais mon attention.</b></span>
+    <span class="line">Qui étais-tu ?</span>
+    <span class="line">Toi, qui tardais à t'exprimer</span>
+    <span class="line">mais en qui je sentais <b>du potentiel.</b></span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 5 -->
+  <div class="block">
+    <span class="line">Comment te comprendre ?</span>
+    <span class="line">Et là peut-être je regrettai</span>
+    <span class="line">de ne pas être resté plus longtemps.</span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 6 -->
+  <div class="block">
+    <span class="line">Et après les discussions s'en suivirent.</span>
+    <span class="line">Nous avons échangé.</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 7 -->
+  <div class="block">
+    <span class="line"><b>Tu as accepté de sacrifier ton transport</b></span>
+    <span class="line">juste parce que nos conversations étaient intéressantes.</span>
+    <span class="line"><b>Tu as accepté de supporter la pluie</b></span>
+    <span class="line">juste pour m'écouter.</span>
+    <span class="line" style="margin-top:8px; color: rgba(200,188,240,0.7); font-size:17px;">Merci.</span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 8 -->
+  <div class="block">
+    <span class="line">En toi j'ai vu <b>quelqu'un qui doute,</b></span>
+    <span class="line">Comme moi.</span>
+    <span class="line">J'ai aussi vu une personne</span>
+    <span class="line"><b>autant fragile que forte.</b></span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 9 -->
+  <div class="block">
+    <span class="line">Une personne qui sourit et rit</span>
+    <span class="line"><b>tellement que ça fait rire.</b></span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <!-- Bloc 10 -->
+  <div class="block">
+    <span class="line">Une personne tellement sensible</span>
+    <span class="line">que parfois <b>j'ai peur de te déranger.</b></span>
+    <span class="line">Histoire de ne pas me sentir coupable.</span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 11 — moment pivot -->
+  <div class="block">
+    <span class="line">Et puis un soir,</span>
+    <span class="line">ces moments-là où je suis <b>vraiment au plus bas,</b></span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line">Je t'ai écrit,</span>
+    <span class="line">comme quelqu'un qui cherchait <b>un dernier rempart.</b></span>
+    <span class="line">Et <b>tu m'as répondu.</b></span>
+    <span class="line">Tu as accepté de m'écouter,</span>
+    <span class="line">Tu as partagé mes peines.</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line" style="font-size:20px; color: rgba(230,220,255,0.95);"><b>Un court instant qui a changé beaucoup de choses.</b></span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 12 — question -->
+  <div class="block">
+    <span class="line">Au vu de tout ça,</span>
+    <span class="line">tu peux peut-être te demander :</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block question-block">
+    <span class="line"><b>Est-ce qu'il est amoureux ?</b></span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line">Honnêtement j'ai failli,</span>
+    <span class="line">mais je me suis ressaisi,</span>
+    <span class="line">parce que <b>je préfère notre amitié</b></span>
+    <span class="line">à une relation éphémère.</span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 13 -->
+  <div class="block">
+    <span class="line">Aujourd'hui on se voit,</span>
+    <span class="line">Je crois que <b>je te dois beaucoup.</b></span>
+    <span class="line">Et aussi bizarre que ça puisse paraître,</span>
+    <span class="line">j'ai un peu peur,</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line">Peur de ne pas être à la hauteur,</span>
+    <span class="line">Peur que tu puisses me considérer</span>
+    <span class="line">comme une simple connaissance.</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line">Car <b>tu représentes beaucoup pour moi</b></span>
+    <span class="line">même si on n'échange que des bribes de mots.</span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 14 -->
+  <div class="block">
+    <span class="line">Je n'ai plus les mots,</span>
+    <span class="line">parce que tu es <b>simple et exceptionnel à la fois.</b></span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line"><b>J'ai vraiment la chance de t'avoir connu.</b></span>
+    <span class="line">Ce que je regrette, c'est de m'être éloigné.</span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 15 — vision -->
+  <div class="block">
+    <span class="line">Et je vois en toi :</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line"><b>Une grande femme en devenir,</b></span>
+    <span class="line"><b>Une femme compatissante.</b></span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 16 — questions finales -->
+  <div class="block">
+    <span class="line">Seulement je me demande :</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block question-block">
+    <span class="line">Est-ce que tu pourras <b>survivre sous les coups durs ?</b></span>
+    <span class="line" style="margin-top:12px">Est-ce que tu pourras <b>rester toi-même</b></span>
+    <span class="line">malgré les attentes de la société ?</span>
+    <span class="line" style="margin-top:12px">Est-ce que tu seras capable, un moment,</span>
+    <span class="line">de <b>te battre pour ce que tu mérites ?</b></span>
+  </div>
+
+  <div class="section-sep">
+    <div class="sep-line"></div>
+    <div class="sep-dot"></div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- Bloc 17 — clôture -->
+  <div class="block">
+    <span class="line">J'ai essayé de ne pas te flatter,</span>
+    <span class="line">J'ai essayé de dire ce que je ressens.</span>
+    <span class="line">J'ai essayé de décrire</span>
+    <span class="line"><b>la simplicité et la complexité</b> que je vois en toi.</span>
+  </div>
+
+  <div class="strophe-sep"></div>
+
+  <div class="block">
+    <span class="line" style="color: rgba(200,190,240,0.7); font-size:17px;">J'espère que ce n'était pas compliqué.</span>
+  </div>
+
+  <!-- Signature -->
+  <div class="signature-block">
+    <div class="sig-line"></div>
+    <div class="sig-name">Valdes</div>
+    <div class="sig-role">Un admirateur</div>
+  </div>
+
+</div>
+
+<script>
+  // Intersection Observer pour révéler les blocs progressivement
+  const blocks = document.querySelectorAll('.block, .section-sep, .signature-block');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Délai léger pour une entrée douce
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  blocks.forEach(block => observer.observe(block));
+</script>
+</body>
+</html>
